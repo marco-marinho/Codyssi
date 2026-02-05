@@ -13,8 +13,8 @@ base65 v
   | otherwise = error "Invalid value for base 65"
 
 toBase65 :: Int -> String -> String
-toBase65 0 acc = if null acc then "0" else acc
-toBase65 n acc = toBase65 q acc'
+toBase65 0 !acc = if null acc then "0" else acc
+toBase65 n !acc = toBase65 q acc'
   where
     (q, r) = n `divMod` 65
     acc' = base65 r : acc
