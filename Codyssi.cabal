@@ -12,8 +12,14 @@ library
     Budget
     Readings
     Sensors
+    Traversing
 
-  build-depends: base ^>=4.21.0.0
+  build-depends:
+    base ^>=4.21.0.0,
+    containers,
+    text,
+    unordered-containers,
+
   hs-source-dirs: lib
   default-language: GHC2024
 

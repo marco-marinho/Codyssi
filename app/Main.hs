@@ -4,6 +4,7 @@ import Budget qualified as BG
 import Readings qualified as R
 import Sensors qualified as S
 import System.Environment (getArgs)
+import Traversing qualified as T
 
 main :: IO ()
 main = do
@@ -13,11 +14,12 @@ main = do
     _ -> putStrLn "Usage: <problem> <part>"
 
 solve :: String -> (Int -> String -> String) -> String -> IO ()
-solve name f part = readFile ("data/" ++ name ++ ".txt") >>= putStrLn . (f (read part :: Int))
+solve name f part = readFile ("data/" ++ name ++ ".txt") >>= putStrLn . f (read part :: Int)
 
-dispatch :: [((String), (String -> IO ()))]
+dispatch :: [(String, String -> IO ())]
 dispatch =
   [ ("budget", solve "budget" BG.solve),
     ("sensors", solve "sensors" S.solve),
-    ("readings", solve "readings" R.solve)
+    ("readings", solve "readings" R.solve),
+    ("traversing", solve "traversing" T.solve)
   ]
