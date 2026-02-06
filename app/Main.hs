@@ -1,6 +1,7 @@
 module Main where
 
 import Budget qualified as BG
+import Compass qualified as C
 import Readings qualified as R
 import Sensors qualified as S
 import System.Environment (getArgs)
@@ -21,5 +22,6 @@ dispatch =
   [ ("budget", solve "budget" BG.solve),
     ("sensors", solve "sensors" S.solve),
     ("readings", solve "readings" R.solve),
-    ("traversing", solve "traversing" T.solve)
+    ("traversing", solve "traversing" T.solve),
+    ("compass", solve "compass" C.solve)
   ]
