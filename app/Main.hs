@@ -1,5 +1,6 @@
 module Main where
 
+import Arithmetic qualified as A
 import Budget qualified as BG
 import Compass qualified as C
 import Readings qualified as R
@@ -23,5 +24,6 @@ dispatch =
     ("sensors", solve "sensors" S.solve),
     ("readings", solve "readings" R.solve),
     ("traversing", solve "traversing" T.solve),
-    ("compass", solve "compass" C.solve)
+    ("compass", solve "compass" C.solve),
+    ("arithmetic", solve "arithmetic" A.solve)
   ]
