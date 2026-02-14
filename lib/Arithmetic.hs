@@ -1,7 +1,6 @@
 module Arithmetic where
 
 import Data.List (maximumBy, sort)
-import Debug.Trace (traceShowId)
 
 applyPricing :: Integer -> Integer -> Integer -> Integer -> Integer
 applyPricing ep mp adt x = ((x ^ ep) * mp) + adt
@@ -33,12 +32,12 @@ part2 input = res
     res = show (applyPricing ep mp adt evenQualities)
 
 part3 :: String -> String
-part3 input = res
+part3 input = show $ fst res
   where
     (adt, mp, ep, roomQualities) = parse input
     prices = map (\s -> (s, applyPricing ep mp adt s)) roomQualities
     filteredPrices = filter (\(_, s) -> s <= 15000000000000) prices
-    res = show $ maximumBy (\(a, _) (b, _) -> compare a b) filteredPrices
+    res = maximumBy (\(a, _) (b, _) -> compare a b) filteredPrices
 
 solve :: Int -> String -> String
 solve n input = case n of

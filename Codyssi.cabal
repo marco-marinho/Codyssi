@@ -15,6 +15,7 @@ library
     Traversing
     Compass
     Arithmetic
+    Supplies
 
   build-depends:
     base ^>=4.21.0.0,

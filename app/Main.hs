@@ -5,6 +5,7 @@ import Budget qualified as BG
 import Compass qualified as C
 import Readings qualified as R
 import Sensors qualified as S
+import Supplies qualified as SP
 import System.Environment (getArgs)
 import Traversing qualified as T
 
@@ -25,5 +26,6 @@ dispatch =
     ("readings", solve "readings" R.solve),
     ("traversing", solve "traversing" T.solve),
     ("compass", solve "compass" C.solve),
-    ("arithmetic", solve "arithmetic" A.solve)
+    ("arithmetic", solve "arithmetic" A.solve),
+    ("supplies", solve "supplies" SP.solve)
   ]
