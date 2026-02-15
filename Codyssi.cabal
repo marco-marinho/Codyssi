@@ -18,6 +18,7 @@ library
     Supplies
     Aeolian
     Islands
+    Lotus
 
   build-depends:
     base ^>=4.21.0.0,
