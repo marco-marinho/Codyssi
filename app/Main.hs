@@ -1,13 +1,14 @@
 module Main where
 
-import Arithmetic qualified as A
-import Budget qualified as BG
-import Compass qualified as C
-import Readings qualified as R
-import Sensors qualified as S
-import Supplies qualified as SP
+import Aeolian qualified
+import Arithmetic qualified
+import Budget qualified
+import Compass qualified
+import Readings qualified
+import Sensors qualified
+import Supplies qualified
 import System.Environment (getArgs)
-import Traversing qualified as T
+import Traversing qualified
 
 main :: IO ()
 main = do
@@ -21,11 +22,12 @@ solve name f part = readFile ("data/" ++ name ++ ".txt") >>= putStrLn . f (read 
 
 dispatch :: [(String, String -> IO ())]
 dispatch =
-  [ ("budget", solve "budget" BG.solve),
-    ("sensors", solve "sensors" S.solve),
-    ("readings", solve "readings" R.solve),
-    ("traversing", solve "traversing" T.solve),
-    ("compass", solve "compass" C.solve),
-    ("arithmetic", solve "arithmetic" A.solve),
-    ("supplies", solve "supplies" SP.solve)
+  [ ("budget", solve "budget" Budget.solve),
+    ("sensors", solve "sensors" Sensors.solve),
+    ("readings", solve "readings" Readings.solve),
+    ("traversing", solve "traversing" Traversing.solve),
+    ("compass", solve "compass" Compass.solve),
+    ("arithmetic", solve "arithmetic" Arithmetic.solve),
+    ("supplies", solve "supplies" Supplies.solve),
+    ("aeolian", solve "aeolian" Aeolian.solve)
   ]

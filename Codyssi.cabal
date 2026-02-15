@@ -16,6 +16,7 @@ library
     Compass
     Arithmetic
     Supplies
+    Aeolian
 
   build-depends:
     base ^>=4.21.0.0,
