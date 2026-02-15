@@ -4,6 +4,7 @@ import Aeolian qualified
 import Arithmetic qualified
 import Budget qualified
 import Compass qualified
+import Islands qualified
 import Readings qualified
 import Sensors qualified
 import Supplies qualified
@@ -29,5 +30,6 @@ dispatch =
     ("compass", solve "compass" Compass.solve),
     ("arithmetic", solve "arithmetic" Arithmetic.solve),
     ("supplies", solve "supplies" Supplies.solve),
-    ("aeolian", solve "aeolian" Aeolian.solve)
+    ("aeolian", solve "aeolian" Aeolian.solve),
+    ("islands", solve "islands" Islands.solve)
   ]

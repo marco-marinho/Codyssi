@@ -17,6 +17,7 @@ library
     Arithmetic
     Supplies
     Aeolian
+    Islands
 
   build-depends:
     base ^>=4.21.0.0,
