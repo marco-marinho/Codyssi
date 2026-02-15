@@ -19,12 +19,15 @@ library
     Aeolian
     Islands
     Lotus
+    Siren
 
   build-depends:
     base ^>=4.21.0.0,
     containers,
     text,
     unordered-containers,
+    split,
+    vector,
 
   hs-source-dirs: lib
   default-language: GHC2024

@@ -8,6 +8,7 @@ import Islands qualified
 import Lotus qualified
 import Readings qualified
 import Sensors qualified
+import Siren qualified
 import Supplies qualified
 import System.Environment (getArgs)
 import Traversing qualified
@@ -33,5 +34,6 @@ dispatch =
     ("supplies", solve "supplies" Supplies.solve),
     ("aeolian", solve "aeolian" Aeolian.solve),
     ("islands", solve "islands" Islands.solve),
-    ("lotus", solve "lotus" Lotus.solve)
+    ("lotus", solve "lotus" Lotus.solve),
+    ("siren", solve "siren" Siren.solve)
   ]
