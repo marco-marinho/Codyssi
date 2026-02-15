@@ -24,11 +24,9 @@ runLengthEncode' (x : xs) (c, count) acc =
     else runLengthEncode' xs (x, 1) ([c] ++ reverse (show count) ++ acc)
 
 runLengthEncode :: String -> String
-runLengthEncode input = runLengthEncode' rest (start, 1) ""
-  where
-    (start, rest) = case input of
-      [] -> error "Input cannot be empty"
-      (c : tl) -> (c, tl)
+runLengthEncode input = case input of
+  [] -> ""
+  (c : tl) -> runLengthEncode' tl (c, 1) ""
 
 part1 :: String -> String
 part1 input = show memCost
