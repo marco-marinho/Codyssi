@@ -7,62 +7,57 @@ import Data.Vector.Mutable qualified as MV
 
 doSwap :: [Int] -> [(Int, Int)] -> Int -> Int
 doSwap freqs swaps target = runST $ do
-  frequencies <- V.thaw (V.fromList freqs)
+  frequencies <- V.unsafeThaw (V.fromList freqs)
 
   let swap swapList = do
         case swapList of
           [] -> return ()
           (a, b) : tl -> do
-            aFreq <- MV.read frequencies a
-            bFreq <- MV.read frequencies b
-            MV.write frequencies a bFreq
-            MV.write frequencies b aFreq
+            aFreq <- MV.unsafeRead frequencies a
+            bFreq <- MV.unsafeRead frequencies b
+            MV.unsafeWrite frequencies a bFreq
+            MV.unsafeWrite frequencies b aFreq
             swap tl
   swap swaps
-  MV.read frequencies target
+  MV.unsafeRead frequencies target
 
 doTrippleSwap :: [Int] -> [(Int, Int, Int)] -> Int -> Int
 doTrippleSwap freqs swaps target = runST $ do
-  frequencies <- V.thaw (V.fromList freqs)
+  frequencies <- V.unsafeThaw (V.fromList freqs)
 
   let swap swapList = do
         case swapList of
           [] -> return ()
           (a, b, c) : tl -> do
-            aFreq <- MV.read frequencies a
-            bFreq <- MV.read frequencies b
-            cFreq <- MV.read frequencies c
-            MV.write frequencies b aFreq
-            MV.write frequencies c bFreq
-            MV.write frequencies a cFreq
+            aFreq <- MV.unsafeRead frequencies a
+            bFreq <- MV.unsafeRead frequencies b
+            cFreq <- MV.unsafeRead frequencies c
+            MV.unsafeWrite frequencies b aFreq
+            MV.unsafeWrite frequencies c bFreq
+            MV.unsafeWrite frequencies a cFreq
             swap tl
   swap swaps
-  MV.read frequencies target
+  MV.unsafeRead frequencies target
 
 doSwapBlock :: [Int] -> [(Int, Int)] -> Int -> Int
 doSwapBlock freqs swaps target = runST $ do
-  frequencies <- V.thaw (V.fromList freqs)
+  frequencies <- V.unsafeThaw (V.fromList freqs)
   let numFrequencies = MV.length frequencies
-
-  let swapBlock x y left = do
-        case left of
-          0 -> return ()
-          _ -> do
-            aFreq <- MV.read frequencies x
-            bFreq <- MV.read frequencies y
-            MV.write frequencies x bFreq
-            MV.write frequencies y aFreq
-            swapBlock (x+1) (y+1) (left - 1)
   
   let swap swapList = do
         case swapList of
           [] -> return ()
           (a, b) : tl -> do
             let swapLen = minimum [abs(a - b), numFrequencies - a, numFrequencies - b]
-            swapBlock a b swapLen
+            temp <- MV.unsafeNew swapLen
+            let sliceA = MV.unsafeSlice a swapLen frequencies
+                sliceB = MV.unsafeSlice b swapLen frequencies
+            MV.unsafeCopy temp sliceA
+            MV.unsafeCopy sliceA sliceB
+            MV.unsafeCopy sliceB temp
             swap tl
   swap swaps
-  MV.read frequencies target
+  MV.unsafeRead frequencies target
 
 parseSwap :: String -> (Int, Int)
 parseSwap line = case splitOn "-" line of
