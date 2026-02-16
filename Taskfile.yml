@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  run:
+    desc: Runs a given solution with the provided name and part
+    cmds:
+      - cabal exec Codyssi -- {{.CLI_ARGS}}
+
+  build:
+    desc: Builds the project
+    cmds:
+      - cabal build

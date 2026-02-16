@@ -7,6 +7,7 @@ import Compass qualified
 import Islands qualified
 import Lotus qualified
 import Readings qualified
+import Risky qualified
 import Sensors qualified
 import Siren qualified
 import Supplies qualified
@@ -35,5 +36,6 @@ dispatch =
     ("aeolian", solve "aeolian" Aeolian.solve),
     ("islands", solve "islands" Islands.solve),
     ("lotus", solve "lotus" Lotus.solve),
-    ("siren", solve "siren" Siren.solve)
+    ("siren", solve "siren" Siren.solve),
+    ("risky", solve "risky" Risky.solve)
   ]

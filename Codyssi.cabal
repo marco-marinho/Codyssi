@@ -20,6 +20,7 @@ library
     Islands
     Lotus
     Siren
+    Risky
 
   build-depends:
     base ^>=4.21.0.0,
