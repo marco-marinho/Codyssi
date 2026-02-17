@@ -13,6 +13,7 @@ import Siren qualified
 import Supplies qualified
 import System.Environment (getArgs)
 import Traversing qualified
+import Windy qualified
 
 main :: IO ()
 main = do
@@ -37,5 +38,6 @@ dispatch =
     ("islands", solve "islands" Islands.solve),
     ("lotus", solve "lotus" Lotus.solve),
     ("siren", solve "siren" Siren.solve),
-    ("risky", solve "risky" Risky.solve)
+    ("risky", solve "risky" Risky.solve),
+    ("windy", solve "windy" Windy.solve)
   ]

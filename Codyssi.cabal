@@ -21,6 +21,7 @@ library
     Lotus
     Siren
     Risky
+    Windy
 
   build-depends:
     base ^>=4.21.0.0,
