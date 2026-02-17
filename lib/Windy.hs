@@ -1,13 +1,39 @@
 module Windy (solve) where
 
+import Control.Monad.ST
 import Data.HashMap.Strict qualified as HM
 import Data.List (sortOn)
 import Data.List.Split
 import Data.Ord (Down (..))
+import Data.STRef
 
 type Balances = HM.HashMap String Int
 
 type Debts = HM.HashMap String [(String, Int)]
+
+data Account s = Account
+  { debts :: STRef s [(String, Int)],
+    balance :: STRef s Int
+  }
+
+settleBalance :: Account s -> ST s ()
+settleBalance account = do
+  currentDebts <- readSTRef (debts account)
+  currentBalance <- readSTRef (balance account)
+  let tryToSettle balance debts = case balance of
+        0 -> (balance, debts)
+        _ -> case debts of
+          [] -> (balance, [])
+          (creditor, debtAmt) : restDebts ->
+            let payment = min debtAmt balance
+                newBalance = balance - payment
+                newDebtAmt = debtAmt - payment
+             in if newDebtAmt > 0
+                  then (newBalance, (creditor, newDebtAmt) : restDebts)
+                  else tryToSettle newBalance restDebts
+  let (leftover, remainingDebts) = tryToSettle currentBalance currentDebts
+  writeSTRef (debts account) remainingDebts
+  writeSTRef (balance account) leftover
 
 doTransaction :: Balances -> (String, String, Int) -> Balances
 doTransaction balances (from, to, ammount) = finalRes
