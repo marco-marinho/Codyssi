@@ -1,5 +1,8 @@
+{-# LANGUAGE BlockArguments #-}
+
 module Windy (solve) where
 
+import Control.Monad (when)
 import Control.Monad.ST
 import Data.HashMap.Strict qualified as HM
 import Data.List (sortOn)
@@ -9,31 +12,61 @@ import Data.STRef
 
 type Balances = HM.HashMap String Int
 
-type Debts = HM.HashMap String [(String, Int)]
-
 data Account s = Account
   { debts :: STRef s [(String, Int)],
     balance :: STRef s Int
   }
 
-settleBalance :: Account s -> ST s ()
-settleBalance account = do
-  currentDebts <- readSTRef (debts account)
-  currentBalance <- readSTRef (balance account)
-  let tryToSettle balance debts = case balance of
-        0 -> (balance, debts)
-        _ -> case debts of
-          [] -> (balance, [])
-          (creditor, debtAmt) : restDebts ->
-            let payment = min debtAmt balance
-                newBalance = balance - payment
-                newDebtAmt = debtAmt - payment
-             in if newDebtAmt > 0
-                  then (newBalance, (creditor, newDebtAmt) : restDebts)
-                  else tryToSettle newBalance restDebts
-  let (leftover, remainingDebts) = tryToSettle currentBalance currentDebts
-  writeSTRef (debts account) remainingDebts
-  writeSTRef (balance account) leftover
+type Bank s = HM.HashMap String (Account s)
+
+addToBalance :: Account s -> Int -> ST s ()
+addToBalance account amount = do
+  modifySTRef' (balance account) (+ amount)
+
+addToDebt :: Account s -> String -> Int -> ST s ()
+addToDebt account creditor amount = do
+  modifySTRef' (debts account) (++ [(creditor, amount)])
+
+settleBalance :: Bank s -> Account s -> ST s ()
+settleBalance bank account = do
+  let tryToSettle = do
+        currentDebts <- readSTRef (debts account)
+        currentBalance <- readSTRef (balance account)
+        case (currentBalance, currentDebts) of
+          (0, _) -> return ()
+          (_, []) -> return ()
+          (bal, (creditor, debtAmt) : restDebts) -> do
+            let payment = min debtAmt bal
+            addToBalance account (-payment)
+            if debtAmt == payment
+              then writeSTRef (debts account) restDebts
+              else writeSTRef (debts account) ((creditor, debtAmt - payment) : restDebts)
+            let creditorAccount = HM.lookupDefault (error "Creditor not found") creditor bank
+            addToBalance creditorAccount payment
+            settleBalance bank creditorAccount
+            tryToSettle
+  tryToSettle
+
+doTransactionWithDebts :: [(String, Int)] -> [(String, String, Int)] -> [Int]
+doTransactionWithDebts initialBalances transactions = runST $ do
+  bank <- HM.fromList <$> mapM createAccount initialBalances
+  mapM_ (processTransaction bank) transactions
+  mapM (readSTRef . balance) (HM.elems bank)
+  where
+    createAccount (name, bal) = do
+      balRef <- newSTRef bal
+      debtRef <- newSTRef []
+      return (name, Account debtRef balRef)
+    processTransaction bank (from, to, amount) = do
+      let fromAccount = HM.lookupDefault (error "From account not found") from bank
+          toAccount = HM.lookupDefault (error "To account not found") to bank
+      fromBalance <- readSTRef (balance fromAccount)
+      let actualAmount = min amount fromBalance
+      addToBalance fromAccount (-actualAmount)
+      when (actualAmount < amount) $ addToDebt fromAccount to (amount - actualAmount)
+      when (actualAmount > 0) $ do
+        addToBalance toAccount actualAmount
+        settleBalance bank toAccount
 
 doTransaction :: Balances -> (String, String, Int) -> Balances
 doTransaction balances (from, to, ammount) = finalRes
@@ -51,44 +84,6 @@ doLimitedTransaction balances (from, to, ammount) = finalRes
     afterWithdraw = HM.insert from (fromBalance - maxTransfer) balances
     toBalance = HM.lookupDefault 0 to afterWithdraw
     finalRes = HM.insert to (toBalance + maxTransfer) afterWithdraw
-
-settleIncoming :: (Balances, Debts) -> String -> Int -> (Balances, Debts)
-settleIncoming (bals, debts) user amount =
-  let userDebts = HM.lookupDefault [] user debts
-      ((balsAfterPay, debtsAfterPay), remainingDebts, leftoverCash) =
-        processDebts (bals, debts) userDebts amount
-      finalDebts = HM.insert user remainingDebts debtsAfterPay
-      currentBal = HM.lookupDefault 0 user balsAfterPay
-      finalBals = HM.insert user (currentBal + leftoverCash) balsAfterPay
-   in (finalBals, finalDebts)
-
-processDebts :: (Balances, Debts) -> [(String, Int)] -> Int -> ((Balances, Debts), [(String, Int)], Int)
-processDebts state [] available = (state, [], available)
-processDebts state debts 0 = (state, debts, 0)
-processDebts state ((creditor, debtAmt) : restDebts) available =
-  let payment = min debtAmt available
-      newState = settleIncoming state creditor payment
-      remainingAvailable = available - payment
-   in if payment < debtAmt
-        then (newState, (creditor, debtAmt - payment) : restDebts, 0)
-        else processDebts newState restDebts remainingAvailable
-
-doTransactionWithDebts :: (Balances, Debts) -> (String, String, Int) -> (Balances, Debts)
-doTransactionWithDebts (balances, debts) (from, to, amount) =
-  let fromBalance = HM.lookupDefault 0 from balances
-      maxTransfer = min amount fromBalance
-      (balancesAfterWithdraw, debtsAfterWithdraw) =
-        if maxTransfer < amount
-          then
-            let fromDebts = HM.lookupDefault [] from debts
-                newFromDebts = (to, amount - maxTransfer) : fromDebts
-                newDebts = HM.insert from newFromDebts debts
-                newBals = HM.insert from (fromBalance - maxTransfer) balances
-             in (newBals, newDebts)
-          else
-            let newBals = HM.insert from (fromBalance - maxTransfer) balances
-             in (newBals, debts)
-   in settleIncoming (balancesAfterWithdraw, debtsAfterWithdraw) to maxTransfer
 
 parseInitial :: String -> (String, Int)
 parseInitial line = case words line of
@@ -131,8 +126,8 @@ part3 :: String -> String
 part3 input = show res
   where
     (initialStates, transactionStates) = parseInput input
-    (balances, _) = foldl' doTransactionWithDebts (HM.fromList initialStates, HM.empty) transactionStates
-    sortedBalances = sortOn Down (map snd (HM.toList balances))
+    balances = doTransactionWithDebts initialStates transactionStates
+    sortedBalances = sortOn Down balances
     res = sum $ take 3 sortedBalances
 
 solve :: Int -> String -> String
