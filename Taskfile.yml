@@ -15,7 +15,12 @@ tasks:
 
   create-solution:
     desc: Creates a new solution with the given name
+    vars:
+      LOWER_NAME:
+        sh: echo "{{.CLI_ARGS}}" | tr '[:upper:]' '[:lower:]'
     cmds:
-      - touch $(echo "data/{{.CLI_ARGS}}.txt" | awk '{print tolower($0)}')
+      - touch data/{{.LOWER_NAME}}.txt
       - NAME={{.CLI_ARGS}} envsubst < Solution.hs.tmpl > lib/{{.CLI_ARGS}}.hs
       - sed -i '/exposed-modules:/a\    {{.CLI_ARGS}}' Codyssi.cabal
+      - 'sed -i "0,/^import /s/^import /import {{.CLI_ARGS}} qualified\nimport /" app/Main.hs'
+      - 'sed -i "/^  ]/i \    , (\"{{.LOWER_NAME}}\", solve \"{{.LOWER_NAME}}\" {{.CLI_ARGS | title}}.solve)" app/Main.hs'

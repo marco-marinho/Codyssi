@@ -9,7 +9,6 @@ common warnings
 library
   import: warnings
   exposed-modules:
-    Test
     Budget
     Readings
     Sensors
