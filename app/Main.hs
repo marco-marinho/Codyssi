@@ -4,6 +4,8 @@ import Aeolian qualified
 import Arithmetic qualified
 import Budget qualified
 import Compass qualified
+import Cyclops qualified
+import Games qualified
 import Islands qualified
 import Lotus qualified
 import Readings qualified
@@ -39,5 +41,7 @@ dispatch =
     ("lotus", solve "lotus" Lotus.solve),
     ("siren", solve "siren" Siren.solve),
     ("risky", solve "risky" Risky.solve),
-    ("windy", solve "windy" Windy.solve)
+    ("windy", solve "windy" Windy.solve),
+    ("cyclops", solve "cyclops" Cyclops.solve),
+    ("games", solve "games" Games.solve)
   ]

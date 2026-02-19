@@ -22,6 +22,8 @@ library
     Siren
     Risky
     Windy
+    Cyclops
+    Games
 
   build-depends:
     base ^>=4.21.0.0,
@@ -30,6 +32,7 @@ library
     unordered-containers,
     split,
     vector,
+    array,
 
   hs-source-dirs: lib
   default-language: GHC2024
