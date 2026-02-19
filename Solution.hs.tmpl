@@ -1,0 +1,17 @@
+module $NAME (solve) where
+
+part1 :: String -> String
+part1 input = input
+
+part2 :: String -> String
+part2 input = input
+
+part3 :: String -> String
+part3 input = input
+
+solve :: Int -> String -> String
+solve n input = case n of
+  1 -> part1 input
+  2 -> part2 input
+  3 -> part3 input
+  _ -> error "Invalid part number"
