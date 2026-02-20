@@ -7,9 +7,9 @@ import Data.Vector.Unboxed.Mutable qualified as MV
 
 data Target = Row | Col | All deriving (Eq, Show)
 
-data Instruction = Shift Target Int Int | Multiply Target Int Int | Sub Target Int Int | Add Target Int Int | None deriving (Eq, Show)
+data Instruction = Shift Target Int Int | Multiply Target Int Int | Sub Target Int Int | Add Target Int Int deriving (Eq, Show)
 
-data ControlFlow = Take | Cycle | Act deriving (Eq, Show)
+data ControlFlow = Cycle | Act deriving (Eq, Show)
 
 data MutableTable s = MutableTable Int Int (MV.MVector s Int)
 
@@ -61,7 +61,6 @@ step table instruction = case instruction of
   Add target amount times -> arith table target amount times (+)
   Sub target amount times -> arith table target amount times (-)
   Shift target identifier times -> shift table target identifier times
-  None -> error "Invalid instruction"
 
 rowSums :: MutableTable s -> ST s [Int]
 rowSums table@(MutableTable rows cols _) = do
@@ -116,17 +115,15 @@ parseInstruction str = case words str of
   ("SUB" : amount : "ALL" : _) -> Sub All (read amount) (-1)
   _ -> error "Invalid instruction format"
 
-doControlFlow :: [ControlFlow] -> Instruction -> [Instruction] -> [Instruction] -> [Instruction]
-doControlFlow _ curr [] acc = reverse (curr : acc)
-doControlFlow [] _ _ acc = reverse acc
-doControlFlow (cf : cfs) current inst@(i : is) acc = case cf of
-  Take -> doControlFlow cfs i is acc
-  Cycle -> doControlFlow cfs None (inst ++ [current]) acc
-  Act -> doControlFlow cfs None inst (current : acc)
+doControlFlow :: [ControlFlow] -> [Instruction] -> [Instruction] -> [Instruction]
+doControlFlow _ [] acc = reverse acc
+doControlFlow [] _ acc = reverse acc
+doControlFlow (cf : cfs) (i : is) acc = case cf of
+  Cycle -> doControlFlow cfs (is ++ [i]) acc
+  Act -> doControlFlow cfs is (i : acc)
 
 parseControlFlow :: String -> ControlFlow
 parseControlFlow str = case str of
-  "TAKE" -> Take
   "CYCLE" -> Cycle
   "ACT" -> Act
   _ -> error "Invalid control flow instruction"
@@ -141,7 +138,7 @@ parse input = (arr, instructions, controlFlow)
       _ -> error "Invalid input format"
     arr = parseArray (unlines arrStr)
     instructions = map parseInstruction instStr
-    controlFlow = map parseControlFlow condStr
+    controlFlow = map parseControlFlow (filter (/= "TAKE") condStr)
 
 part1 :: String -> String
 part1 input = show res
@@ -153,14 +150,14 @@ part2 :: String -> String
 part2 input = show res
   where
     (arr, instructions, controlFlow) = parse input
-    finalInstructions = doControlFlow controlFlow None instructions []
+    finalInstructions = doControlFlow controlFlow instructions []
     res = runInstructions arr finalInstructions
 
 part3 :: String -> String
 part3 input = show res
   where
     (arr, instructions, controlFlow) = parse input
-    finalInstructions = doControlFlow (cycle controlFlow) None instructions []
+    finalInstructions = doControlFlow (cycle controlFlow) instructions []
     res = runInstructions arr finalInstructions
 
 solve :: Int -> String -> String
