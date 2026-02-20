@@ -16,6 +16,7 @@ import Supplies qualified
 import System.Environment (getArgs)
 import Traversing qualified
 import Windy qualified
+import Whirlpool qualified
 
 main :: IO ()
 main = do
@@ -43,5 +44,6 @@ dispatch =
     ("risky", solve "risky" Risky.solve),
     ("windy", solve "windy" Windy.solve),
     ("cyclops", solve "cyclops" Cyclops.solve),
-    ("games", solve "games" Games.solve)
+    ("games", solve "games" Games.solve),
+    ("whirlpool", solve "whirlpool" Whirlpool.solve)
   ]
