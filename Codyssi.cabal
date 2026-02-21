@@ -9,6 +9,7 @@ common warnings
 library
   import: warnings
   exposed-modules:
+    Guards
     Whirlpool
     Budget
     Readings
@@ -34,6 +35,7 @@ library
     split,
     vector,
     array,
+    psqueues,
 
   hs-source-dirs: lib
   default-language: GHC2024

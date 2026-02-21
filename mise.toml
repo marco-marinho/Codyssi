@@ -1,0 +1,5 @@
+[tools]
+cabal = "3.14.2"
+ghc = "9.12.2"
+python = "latest"
+task = "latest"
